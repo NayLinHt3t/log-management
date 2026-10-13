@@ -1,0 +1,12 @@
+{
+  // Editor and type-check settings for the dev scripts. They run with tsx and are never
+  // compiled; "logmgmt-source" resolves @logs/core to its TypeScript source (no build needed).
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "noEmit": true,
+    "customConditions": ["logmgmt-source"]
+  },
+  "include": ["**/*.ts"]
+}

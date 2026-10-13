@@ -1,0 +1,35 @@
+{
+  "name": "log-management",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "ingest",
+    "worker",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "tsc -b && npm run build -w frontend",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "INTEGRATION=1 vitest run tests/integration",
+    "typecheck": "tsc -p scripts && tsc -p tests",
+    "dev": "tsx --env-file-if-exists=.env scripts/dev.ts",
+    "db:up": "docker compose up -d --wait db",
+    "db:migrate": "tsx --conditions=logmgmt-source --env-file-if-exists=.env scripts/migrate.ts",
+    "smoke": "tsx --conditions=logmgmt-source --env-file-if-exists=.env scripts/smoke.ts",
+    "simulate": "python3 samples/simulate.py"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  },
+  "description": "Multi-tenant log management demo: syslog/HTTP/file ingest, normalization, search, dashboard, alerting",
+  "engines": {
+    "node": ">=22"
+  }
+}

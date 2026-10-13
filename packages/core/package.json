@@ -1,0 +1,27 @@
+{
+  "name": "@logs/core",
+  "version": "1.0.0",
+  "description": "Shared schema, parsers, normalizers, query language and database helpers",
+  "private": true,
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "logmgmt-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "pg": "^8.23.1",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+*.tsbuildinfo
+coverage
+# runtime data of the appliance (inbox files, processed/failed reports)
+data/

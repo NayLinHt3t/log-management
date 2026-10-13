@@ -1,0 +1,27 @@
+# SaaS / cloud mode, layered on top of docker-compose.yml:
+#
+#   ./run.sh saas
+#   docker compose -f docker-compose.yml -f docker-compose.saas.yml up -d --build
+#
+# With DOMAIN set (DNS A record -> this VM), Caddy gets a trusted Let's Encrypt certificate.
+# Without DOMAIN, the VM's IP is served with a self-signed certificate (allowed by the
+# assignment as long as it is documented; see docs/setup_saas.md).
+
+services:
+  db:
+    # no host port at all in the cloud: the database is reachable only on the compose network
+    ports: !reset []
+
+  backend:
+    environment:
+      PUBLIC_URL: ${PUBLIC_URL:-https://${DOMAIN:-localhost}}
+
+  worker:
+    environment:
+      PUBLIC_URL: ${PUBLIC_URL:-https://${DOMAIN:-localhost}}
+
+  web:
+    environment:
+      # DOMAIN=logs.example.com + TLS_MODE=acme in .env -> Let's Encrypt certificate
+      SITE_ADDRESS: ${DOMAIN:-https://}
+      TLS_MODE: ${TLS_MODE:-selfsigned}

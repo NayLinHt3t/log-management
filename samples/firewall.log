@@ -1,0 +1,6 @@
+<134>Aug 20 12:44:56 fw01 vendor=demo product=ngfw action=deny src=10.0.1.10 dst=8.8.8.8 spt=5353 dpt=53 proto=udp msg=DNS blocked policy=Block-DNS
+<134>Aug 20 12:45:02 fw01 vendor=demo product=ngfw action=allow src=10.0.1.22 dst=142.250.72.14 spt=51544 dpt=443 proto=tcp msg=session start policy=Allow-Web
+<132>Aug 20 12:45:10 fw01 vendor=demo product=ngfw action=deny src=198.51.100.9 dst=10.0.1.5 spt=40112 dpt=3389 proto=tcp msg=Port blocked policy=Inbound-Default-Deny
+<189>Aug 20 12:46:00 FGT60F devname="FGT60F" type="traffic" srcip=10.0.2.15 srcport=60211 dstip=1.1.1.1 dstport=53 proto=17 action="deny" policyid=12 policyname="Block DNS"
+<134>Aug 20 12:47:30 fw02 CEF:0|Acme|NGFW|9.1|1001|Port scan detected|7|src=198.51.100.9 dst=10.0.0.5 spt=40000 dpt=22 proto=TCP act=blocked cs1Label=Rule cs1=Scan-Protect msg=SSH sweep
+<4>Aug 20 12:48:11 gw kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.50 DST=10.0.0.2 LEN=60 PROTO=TCP SPT=51515 DPT=22

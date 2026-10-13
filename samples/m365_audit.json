@@ -1,0 +1,7 @@
+[
+  {"CreationTime": "2026-10-12T10:05:00", "Id": "8c2b5c1e-0d3e-4c6f-9f0a-000000000001", "Operation": "UserLoggedIn", "OrganizationId": "11111111-2222-3333-4444-555555555555", "RecordType": 15, "ResultStatus": "Success", "UserId": "bob@demo.local", "ClientIP": "198.51.100.23", "Workload": "AzureActiveDirectory"},
+  {"CreationTime": "2026-10-12T10:06:10", "Id": "8c2b5c1e-0d3e-4c6f-9f0a-000000000002", "Operation": "UserLoginFailed", "OrganizationId": "11111111-2222-3333-4444-555555555555", "RecordType": 15, "ResultStatus": "Failed", "LogonError": "InvalidUserNameOrPassword", "UserId": "carol@demo.local", "ClientIP": "203.0.113.120:51122", "Workload": "AzureActiveDirectory"},
+  {"CreationTime": "2026-10-12T10:07:00", "Id": "8c2b5c1e-0d3e-4c6f-9f0a-000000000003", "Operation": "FileAccessed", "RecordType": 6, "ResultStatus": "Succeeded", "UserId": "bob@demo.local", "ClientIP": "198.51.100.23", "Workload": "SharePoint", "ObjectId": "https://demo.sharepoint.com/sites/finance/Shared Documents/q3.xlsx"},
+  {"CreationTime": "2026-10-12T10:08:30", "Id": "8c2b5c1e-0d3e-4c6f-9f0a-000000000004", "Operation": "New-InboxRule", "RecordType": 1, "ResultStatus": "True", "UserId": "grace@demo.local", "ClientIP": "[2001:db8::7]:443", "Workload": "Exchange"},
+  {"CreationTime": "2026-10-12T10:09:00", "Id": "8c2b5c1e-0d3e-4c6f-9f0a-000000000005", "Operation": "Add member to role.", "RecordType": 8, "ResultStatus": "Success", "UserId": "it-admin@demo.local", "ClientIP": "198.51.100.24", "Workload": "AzureActiveDirectory", "ObjectId": "Global Administrator"}
+]

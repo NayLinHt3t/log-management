@@ -1,0 +1,8 @@
+[
+  {"EventID": 4624, "TimeCreated": "2026-10-12T11:00:00Z", "Computer": "DC01", "TargetUserName": "bob", "TargetDomainName": "DEMO", "IpAddress": "10.0.1.21", "LogonType": 3, "Status": "0x0"},
+  {"EventID": 4625, "TimeCreated": "2026-10-12T11:01:00Z", "Computer": "DC01", "TargetUserName": "eve", "TargetDomainName": "DEMO", "IpAddress": "203.0.113.77", "IpPort": "51515", "LogonType": 3, "Status": "0xc000006d", "SubStatus": "0xc000006a"},
+  {"EventID": 4740, "TimeCreated": "2026-10-12T11:02:00Z", "Computer": "DC01", "TargetUserName": "eve", "TargetDomainName": "DEMO"},
+  {"EventID": 4720, "TimeCreated": "2026-10-12T11:05:00Z", "Computer": "DC02", "TargetUserName": "temp-admin", "TargetDomainName": "DEMO", "SubjectUserName": "admin"},
+  {"EventID": 4688, "TimeCreated": "2026-10-12T11:06:00Z", "Computer": "SRV-FILE01", "SubjectUserName": "svc_backup", "NewProcessName": "C:\\Windows\\System32\\vssadmin.exe"},
+  {"EventID": 1102, "TimeCreated": "2026-10-12T11:07:00Z", "Computer": "DC02", "SubjectUserName": "admin"}
+]

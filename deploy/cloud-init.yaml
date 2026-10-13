@@ -1,0 +1,29 @@
+#cloud-config
+# First-boot setup for an Ubuntu 22.04/24.04 VM: installs Docker, fetches the project and
+# starts the SaaS deployment. Paste as "user data" when creating the VM.
+#
+# Edit the two values below. DOMAIN must already resolve to the VM's public IP for a
+# Let's Encrypt certificate; leave it empty to serve the IP with a self-signed certificate.
+# Logins and the ingest key end up in /var/log/logmgmt-install.log (root only).
+
+write_files:
+  - path: /etc/logmgmt.conf
+    permissions: "0600"
+    content: |
+      REPO_URL=https://github.com/<your-account>/log-management.git
+      DOMAIN=
+
+package_update: true
+packages:
+  - git
+  - curl
+  - python3
+  - netcat-openbsd
+
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - . /etc/logmgmt.conf && git clone "$REPO_URL" /opt/log-management
+  - cp /opt/log-management/.env.example /opt/log-management/.env
+  - . /etc/logmgmt.conf && if [ -n "$DOMAIN" ]; then sed -i "s/^DOMAIN=.*/DOMAIN=$DOMAIN/; s/^TLS_MODE=.*/TLS_MODE=acme/" /opt/log-management/.env; fi
+  - cd /opt/log-management && ./run.sh saas > /var/log/logmgmt-install.log 2>&1
+  - chmod 600 /var/log/logmgmt-install.log /opt/log-management/.env

@@ -1,0 +1,6 @@
+[
+  {"tenant": "demoA", "source": "api", "event_type": "app_login_failed", "user": "alice", "ip": "203.0.113.7", "reason": "wrong_password"},
+  {"tenant": "demoA", "source": "api", "event_type": "app_login_success", "user": "alice", "ip": "203.0.113.7"},
+  {"tenant": "demoA", "source": "api", "event_type": "order_created", "user": "carol", "ip": "10.0.1.30", "url": "/api/orders", "method": "POST", "status_code": 201},
+  {"tenant": "demoB", "source": "api", "event_type": "password_reset", "user": "grace@demo.local", "ip": "198.51.100.24"}
+]

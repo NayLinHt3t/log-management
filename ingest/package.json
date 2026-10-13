@@ -1,0 +1,17 @@
+{
+  "name": "@logs/ingest",
+  "version": "1.0.0",
+  "description": "Syslog UDP/TCP listener and inbox-folder file collector",
+  "private": true,
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "dev": "tsx watch --conditions=logmgmt-source --env-file-if-exists=../.env src/index.ts"
+  },
+  "dependencies": {
+    "@logs/core": "^1.0.0"
+  }
+}

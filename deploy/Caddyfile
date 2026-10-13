@@ -1,0 +1,54 @@
+# Edge proxy for the log management UI and API.
+#
+#   SITE_ADDRESS  where to listen: "https://" = any host name or IP (default),
+#                 or a domain such as logs.example.com for a SaaS deployment
+#   TLS_MODE      selfsigned (default): certificate from Caddy's internal CA, issued on
+#                 demand for whatever name/IP the browser uses; browsers warn once
+#                 acme: trusted Let's Encrypt certificate for SITE_ADDRESS (needs DNS
+#                 pointing at this host and ports 80/443 open to the internet)
+{
+	# the internal CA lives in the container; do not try to install it into a trust store
+	skip_install_trust
+	admin localhost:2019
+}
+
+(tls_selfsigned) {
+	tls internal {
+		on_demand
+	}
+}
+
+(tls_acme) {
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
+{$SITE_ADDRESS:https://} {
+	import tls_{$TLS_MODE:selfsigned}
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy {$BACKEND_UPSTREAM:backend:3000}
+	}
+
+	handle {
+		root * {$UI_ROOT:/srv}
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+# Plain HTTP only redirects to HTTPS.
+http:// {
+	redir https://{host}{uri} permanent
+}

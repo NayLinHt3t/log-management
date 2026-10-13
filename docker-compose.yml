@@ -1,0 +1,132 @@
+# Appliance mode: the whole system on one machine or VM.
+#
+#   ./run.sh up                      (creates .env with random secrets, then builds and starts)
+#   docker compose up -d --build     (if .env already exists)
+#
+#   UI + API   https://<this host>         self-signed certificate by default
+#   Syslog     udp/tcp <this host>:514
+#   Files      ./data/inbox/<tenant>/      picked up every 5 seconds
+#
+# SaaS mode adds docker-compose.saas.yml on top of this file (see docs/setup_saas.md).
+
+name: logmgmt
+
+x-app: &app
+  build:
+    context: .
+    target: app
+  image: logmgmt-app:latest
+  restart: unless-stopped
+  logging: &logging
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+x-app-env: &app-env
+  NODE_ENV: production
+  POSTGRES_URL: postgres://${POSTGRES_USER:-logs}:${POSTGRES_PASSWORD:-logs}@db:5432/${POSTGRES_DB:-logs}
+  RETENTION_DAYS: ${RETENTION_DAYS:-7}
+  LATE_EVENT_POLICY: ${LATE_EVENT_POLICY:-restamp}
+  MAX_FUTURE_MINUTES: ${MAX_FUTURE_MINUTES:-60}
+  PUBLIC_URL: ${PUBLIC_URL:-}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-logs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-logs}
+      POSTGRES_DB: ${POSTGRES_DB:-logs}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # localhost only: for psql and `npm run dev`; never exposed to the network
+      - "127.0.0.1:${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging: *logging
+
+  # REST API: auth, ingest, search, dashboard, alerts. Runs migrations + demo seed on start.
+  backend:
+    <<: *app
+    command: ["node", "backend/dist/index.js"]
+    environment:
+      <<: *app-env
+      JWT_SECRET: ${JWT_SECRET:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      VIEWER_PASSWORD: ${VIEWER_PASSWORD:-}
+      INGEST_API_KEY: ${INGEST_API_KEY:-}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # Syslog UDP/TCP listener (container port 5514, published as 514) + inbox folder collector.
+  ingest:
+    <<: *app
+    command: ["node", "ingest/dist/index.js"]
+    environment:
+      <<: *app-env
+      SYSLOG_DEFAULT_TENANT: ${SYSLOG_DEFAULT_TENANT:-demoA}
+      SYSLOG_TENANT_MAP: ${SYSLOG_TENANT_MAP:-}
+      SYSLOG_TIMESTAMP: ${SYSLOG_TIMESTAMP:-auto}
+      INBOX_DIR: /data/inbox
+    ports:
+      - "${SYSLOG_PORT:-514}:5514/udp"
+      - "${SYSLOG_PORT:-514}:5514/tcp"
+    volumes:
+      - ./data/inbox:/data/inbox
+    depends_on:
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8081/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Alert rule evaluation + webhooks, partition pre-creation and retention.
+  worker:
+    <<: *app
+    command: ["node", "worker/dist/index.js"]
+    environment:
+      <<: *app-env
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      ALERT_INTERVAL_SECONDS: ${ALERT_INTERVAL_SECONDS:-15}
+    depends_on:
+      backend: { condition: service_healthy }
+
+  # HTTPS edge: serves the UI and proxies /api to the backend.
+  web:
+    build:
+      context: .
+      target: web
+    image: logmgmt-web:latest
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-https://}
+      TLS_MODE: ${TLS_MODE:-selfsigned}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend: { condition: service_healthy }
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

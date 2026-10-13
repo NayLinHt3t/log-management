@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Build, unit + integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: logs
+          POSTGRES_PASSWORD: logs
+          POSTGRES_DB: logs
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U logs"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_POSTGRES_URL: postgres://logs:logs@localhost:5432/logs_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run typecheck
+      - run: npm test
+
+  appliance:
+    name: Docker appliance smoke test
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the appliance (generates .env with random secrets)
+        run: ./run.sh up
+      - name: Syslog over UDP and TCP
+        run: |
+          sudo apt-get install -y netcat-openbsd >/dev/null
+          ./samples/send_syslog.sh localhost 514 both
+      - name: HTTP ingest of the assignment samples
+        run: python3 samples/post_logs.py --url https://localhost --insecure
+      - name: The ingested records are searchable
+        run: |
+          source .env
+          TOKEN=$(curl -ksf https://localhost/api/auth/login -H 'content-type: application/json' \
+            -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PASSWORD\"}" | python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])')
+          sleep 3
+          for q in "user:alice" "source:firewall" "source:network"; do
+            n=$(curl -ksf -G https://localhost/api/events --data-urlencode "q=$q" -H "authorization: Bearer $TOKEN" \
+              | python3 -c 'import sys,json; print(len(json.load(sys.stdin)["events"]))')
+            echo "$q -> $n events"; test "$n" -gt 0
+          done
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail=200

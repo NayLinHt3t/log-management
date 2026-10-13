@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.git
+.github
+.env
+.env.*
+!.env.example
+data
+docs
+tests
+samples
+postman
+scripts
+*.md
+coverage

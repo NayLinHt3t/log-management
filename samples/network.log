@@ -1,0 +1,4 @@
+<190>Aug 20 13:01:02 r1 if=ge-0/0/1 event=link-down mac=aa:bb:cc:dd:ee:ff reason=carrier-loss
+<190>Aug 20 13:01:45 r1 if=ge-0/0/1 event=link-up mac=aa:bb:cc:dd:ee:ff reason=carrier-restored
+<187>Aug 20 13:05:12 r2 event=bgp-neighbor-down peer=192.0.2.1 reason=hold-timer-expired
+<189>Aug 20 13:10:00 sw3 event=config-change user=netops reason=commit
